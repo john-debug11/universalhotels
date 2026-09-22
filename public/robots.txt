@@ -1,0 +1,15 @@
+# Robots.txt for Universal Hotels Australia
+# https://universalhotels.com.au
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /*?*filter=
+Disallow: /*?*preview=
+
+# Crawl-delay for considerate crawling
+Crawl-delay: 1
+
+# XML Sitemaps
+Sitemap: https://universalhotels.com.au/sitemap.xml
