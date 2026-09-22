@@ -36,6 +36,7 @@ import { TableBookingModal } from '../home/TableBookingModal';
 import { EventEnquiryModal } from '../home/EventEnquiryModal';
 import { AeoFactBlock } from '../seo/AeoFactBlock';
 import { trackBookingClick, trackPhoneClick, trackFunctionEnquiry, trackAccommodationClick } from '../../utils/analytics';
+import { applySeoMetadata, generateVenueSeoMetadata, generateVenueLocalBusinessSchema } from '../../utils/seo';
 
 export interface VenueDetailTemplateProps {
   venue: VenueDetailRecord;
@@ -50,61 +51,23 @@ export const VenueDetailTemplate: React.FC<VenueDetailTemplateProps> = ({ venue,
   const [selectedSpaceForEnquiry, setSelectedSpaceForEnquiry] = useState<string | undefined>(undefined);
   const [activeGalleryImage, setActiveGalleryImage] = useState<string | null>(null);
 
-  // SEO: Dynamically update document title and meta description
+  // SEO: Dynamically update document title, meta description, OpenGraph, Twitter cards & Schema
   useEffect(() => {
-    document.title = `${venue.seo.title} | Universal Hotels Australia`;
-    
-    // Update meta description
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', venue.seo.metaDescription);
-    }
-
-    // Set canonical tag
-    let canonicalEl = document.querySelector('link[rel="canonical"]');
-    if (!canonicalEl) {
-      canonicalEl = document.createElement('link');
-      canonicalEl.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonicalEl);
-    }
-    canonicalEl.setAttribute('href', `https://universalhotels.com.au/venues/${venue.slug}`);
-
-    // Inject JSON-LD Schema.org structured data
-    const schemaScriptId = `schema-venue-${venue.slug}`;
-    let existingScript = document.getElementById(schemaScriptId);
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.id = schemaScriptId;
-      script.type = 'application/ld+json';
-      const schemaData = {
-        '@context': 'https://schema.org',
-        '@type': venue.seo.schemaType || 'BarOrPub',
-        name: venue.venueName,
-        description: venue.seo.metaDescription,
-        address: {
-          '@type': 'PostalAddress',
-          streetAddress: venue.address,
-          addressLocality: venue.locationSuburb,
-          addressRegion: 'NSW',
-          postalCode: venue.address.match(/\d{4}/)?.[0] || '2000',
-          addressCountry: 'AU'
-        },
-        telephone: venue.phone,
-        url: `https://www.universalhotels.com.au/venues/${venue.slug}`,
-        openingHours: venue.openingHours,
-        priceRange: '$$',
-        servesCuisine: venue.foodAndDrink.concept
-      };
-      script.text = JSON.stringify(schemaData);
-      document.head.appendChild(script);
-    }
-
-    return () => {
-      const script = document.getElementById(schemaScriptId);
-      if (script) {
-        script.remove();
-      }
-    };
+    const seoConfig = generateVenueSeoMetadata(venue);
+    const rawDbVenue = VENUE_DATABASE.find(v => v.url.includes(venue.slug)) || ({
+      venueName: venue.venueName,
+      url: `/venues/${venue.slug}`,
+      locationSuburb: venue.locationSuburb,
+      address: venue.address,
+      phone: venue.phone,
+      bookingUrl: venue.bookingUrl,
+      venueType: venue.venueType,
+      dining: venue.foodAndDrink.concept,
+      accommodation: venue.accommodation ? 'Hotel Accommodation' : ''
+    } as any);
+    seoConfig.schemaJson = generateVenueLocalBusinessSchema(rawDbVenue, venue);
+    const cleanup = applySeoMetadata(seoConfig);
+    return cleanup;
   }, [venue]);
 
   // Find matching raw venue record for booking modal

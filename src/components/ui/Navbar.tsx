@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X, ChevronDown, Phone, MapPin, Calendar, Users, Bed, ArrowUpRight } from 'lucide-react';
 import { Button } from './Button';
+import { UniversalHotelsLogo } from '../brand/UniversalHotelsLogo';
 
 export interface NavbarProps {
   activePath?: string;
@@ -37,14 +38,17 @@ export const Navbar: React.FC<NavbarProps> = ({ activePath = '/', onNavigate }) 
           {/* Brand Identity */}
           <button
             onClick={() => onNavigate?.('/')}
-            className="flex flex-col text-left group cursor-pointer"
+            className="flex items-center text-left group cursor-pointer focus:outline-none"
+            aria-label="Universal Hotels Home"
           >
-            <span className="text-xl sm:text-2xl font-serif tracking-tight text-[#121314] group-hover:text-[#A47844] transition-colors font-bold">
-              UNIVERSAL HOTELS
-            </span>
-            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.25em] text-[#A47844]">
-              Sydney • Hospitality Ecosystem
-            </span>
+            <UniversalHotelsLogo
+              variant="dark"
+              height={38}
+              showWordmark={true}
+              showSubtitle={true}
+              subtitleText="Sydney • Hospitality Ecosystem"
+              className="group-hover:opacity-90 transition-opacity"
+            />
           </button>
 
           {/* Desktop Navigation Links */}

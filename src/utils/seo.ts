@@ -8,8 +8,14 @@ export interface SeoMetadata {
   canonicalUrl: string;
   ogType?: 'website' | 'article' | 'place' | 'restaurant';
   ogImage?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
   keywords?: string[];
   noindex?: boolean;
+  schemaJson?: Record<string, any> | Array<Record<string, any>>;
 }
 
 // 1. Organization Schema (Headquarters & Portfolio)
@@ -19,7 +25,7 @@ export const ORGANIZATION_SCHEMA = {
   name: 'Universal Hotels Australia',
   legalName: 'Universal Hotels Group Pty Ltd',
   url: 'https://universalhotels.com.au',
-  logo: 'https://universalhotels.com.au/assets/universal-hotels-logo.png',
+  logo: 'https://universalhotels.com.au/assets/Universalhotels-Masterblack-removebg-preview.png',
   foundingDate: '1998',
   founders: [
     {
@@ -170,27 +176,44 @@ export interface RedirectRule {
 }
 
 export const SEO_REDIRECT_MAP: RedirectRule[] = [
-  // Legacy Venue URLs
-  { from: '/the-imperial', to: '/venues/the-imperial-hotel-erskineville', statusCode: 301, reason: 'Legacy venue alias to canonical' },
-  { from: '/imperial-hotel', to: '/venues/the-imperial-hotel-erskineville', statusCode: 301, reason: 'Legacy venue alias to canonical' },
-  { from: '/imperial', to: '/venues/the-imperial-hotel-erskineville', statusCode: 301, reason: 'Short slug to canonical' },
+  // Legacy Venue URLs to Exact Canonical Routes
+  { from: '/the-imperial', to: '/venues/imperial-hotel-erskineville', statusCode: 301, reason: 'Legacy venue alias to canonical' },
+  { from: '/imperial-hotel', to: '/venues/imperial-hotel-erskineville', statusCode: 301, reason: 'Legacy venue alias to canonical' },
+  { from: '/imperial', to: '/venues/imperial-hotel-erskineville', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/venues/the-imperial-hotel-erskineville', to: '/venues/imperial-hotel-erskineville', statusCode: 301, reason: 'Long slug to canonical' },
   { from: '/universal', to: '/venues/universal-sydney', statusCode: 301, reason: 'Legacy venue alias to canonical' },
-  { from: '/civic', to: '/venues/civic-hotel-sydney', statusCode: 301, reason: 'Legacy venue alias to canonical' },
-  { from: '/civic-hotel', to: '/venues/civic-hotel-sydney', statusCode: 301, reason: 'Legacy venue alias to canonical' },
+  { from: '/civic', to: '/venues/civic-hotel', statusCode: 301, reason: 'Legacy venue alias to canonical' },
+  { from: '/civic-hotel', to: '/venues/civic-hotel', statusCode: 301, reason: 'Legacy venue alias to canonical' },
+  { from: '/venues/civic-hotel-sydney', to: '/venues/civic-hotel', statusCode: 301, reason: 'Long slug to canonical' },
   { from: '/crown-hotel', to: '/venues/crown-hotel-surry-hills', statusCode: 301, reason: 'Legacy venue alias to canonical' },
-  { from: '/tudor-hotel', to: '/venues/the-tudor-hotel-redfern', statusCode: 301, reason: 'Legacy venue alias to canonical' },
-  { from: '/tudor', to: '/venues/the-tudor-hotel-redfern', statusCode: 301, reason: 'Short slug to canonical' },
-  { from: '/riley-hotel', to: '/venues/the-riley-hotel-darlinghurst', statusCode: 301, reason: 'Legacy venue alias to canonical' },
-  { from: '/the-riley', to: '/venues/the-riley-hotel-darlinghurst', statusCode: 301, reason: 'Short slug to canonical' },
-  { from: '/harold-park-hotel', to: '/venues/the-harold-hotel-forest-lodge', statusCode: 301, reason: 'Former hotel name migration' },
-  { from: '/the-harold', to: '/venues/the-harold-hotel-forest-lodge', statusCode: 301, reason: 'Short slug to canonical' },
-  { from: '/lord-roberts', to: '/venues/lord-roberts-hotel-east-sydney', statusCode: 301, reason: 'Short slug to canonical' },
-  { from: '/oxford-hotel', to: '/venues/the-oxford-hotel-darlinghurst', statusCode: 301, reason: 'Legacy venue alias to canonical' },
-  { from: '/evening-star', to: '/venues/the-evening-star-hotel-surry-hills', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/tudor-hotel', to: '/venues/the-tudor-hotel', statusCode: 301, reason: 'Legacy venue alias to canonical' },
+  { from: '/tudor', to: '/venues/the-tudor-hotel', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/venues/the-tudor-hotel-redfern', to: '/venues/the-tudor-hotel', statusCode: 301, reason: 'Long slug to canonical' },
+  { from: '/riley-hotel', to: '/venues/the-riley-hotel', statusCode: 301, reason: 'Legacy venue alias to canonical' },
+  { from: '/the-riley', to: '/venues/the-riley-hotel', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/venues/the-riley-hotel-darlinghurst', to: '/venues/the-riley-hotel', statusCode: 301, reason: 'Long slug to canonical' },
+  { from: '/harold-park-hotel', to: '/venues/the-harold', statusCode: 301, reason: 'Former hotel name migration' },
+  { from: '/the-harold', to: '/venues/the-harold', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/venues/the-harold-hotel-forest-lodge', to: '/venues/the-harold', statusCode: 301, reason: 'Long slug to canonical' },
+  { from: '/lord-roberts', to: '/venues/the-lord-roberts-hotel', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/the-lord-roberts', to: '/venues/the-lord-roberts-hotel', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/venues/lord-roberts-hotel-east-sydney', to: '/venues/the-lord-roberts-hotel', statusCode: 301, reason: 'Long slug to canonical' },
+  { from: '/oxford-hotel', to: '/venues/the-oxford-hotel', statusCode: 301, reason: 'Legacy venue alias to canonical' },
+  { from: '/venues/the-oxford-hotel-darlinghurst', to: '/venues/the-oxford-hotel', statusCode: 301, reason: 'Long slug to canonical' },
+  { from: '/evening-star', to: '/venues/the-evening-star', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/venues/the-evening-star-hotel-surry-hills', to: '/venues/the-evening-star', statusCode: 301, reason: 'Long slug to canonical' },
   { from: '/riverview-hotel', to: '/venues/riverview-hotel-tempe', statusCode: 301, reason: 'Short slug to canonical' },
   { from: '/moko', to: '/venues/moko-eastwood', statusCode: 301, reason: 'Short slug to canonical' },
-  { from: '/palace-hotel', to: '/venues/palace-hotel-sydney', statusCode: 301, reason: 'Short slug to canonical' },
-  { from: '/vbar', to: '/venues/v-bar-sydney', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/palace-hotel', to: '/venues/palace-hotel', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/venues/palace-hotel-sydney', to: '/venues/palace-hotel', statusCode: 301, reason: 'Long slug to canonical' },
+  { from: '/vbar', to: '/venues/v-bar', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/venues/v-bar-sydney', to: '/venues/v-bar', statusCode: 301, reason: 'Long slug to canonical' },
+  { from: '/tempe', to: '/venues/tempe-hotel', statusCode: 301, reason: 'Short slug to canonical' },
+  { from: '/enfield', to: '/venues/enfield-hotel', statusCode: 301, reason: 'Short slug to canonical' },
+
+  // About and Contact Aliases
+  { from: '/about-us', to: '/about', statusCode: 301, reason: 'Standardize to /about' },
+  { from: '/contact-us', to: '/contact', statusCode: 301, reason: 'Standardize to /contact' },
 
   // Legacy Hub & Feature URLs
   { from: '/events', to: '/whats-on', statusCode: 301, reason: 'Redirect to central event discovery hub' },
@@ -313,14 +336,14 @@ export const KEYWORD_MAPPING_MATRIX: KeywordMappingRecord[] = [
   }
 ];
 
-// 8. Client-side DOM Metadata Applicator
-export const applySeoMetadata = (meta: SeoMetadata) => {
-  if (typeof document === 'undefined') return;
+// 8. Client-side DOM Metadata Applicator with Open Graph, Twitter & Schema Support
+export const applySeoMetadata = (meta: SeoMetadata): (() => void) => {
+  if (typeof document === 'undefined') return () => {};
 
-  // Title
+  // 1. Title
   document.title = meta.title;
 
-  // Helper
+  // Tag helper
   const setMetaTag = (attr: 'name' | 'property', key: string, content: string) => {
     let el = document.querySelector(`meta[${attr}="${key}"]`);
     if (!el) {
@@ -331,32 +354,40 @@ export const applySeoMetadata = (meta: SeoMetadata) => {
     el.setAttribute('content', content);
   };
 
-  // Standard Meta
+  // 2. Standard Search Meta
   setMetaTag('name', 'description', meta.description);
   if (meta.keywords && meta.keywords.length > 0) {
     setMetaTag('name', 'keywords', meta.keywords.join(', '));
   }
   setMetaTag('name', 'robots', meta.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
 
-  // OpenGraph
-  setMetaTag('property', 'og:title', meta.title);
-  setMetaTag('property', 'og:description', meta.description);
+  // 3. OpenGraph Tags
+  const ogTitle = meta.ogTitle || meta.title;
+  const ogDescription = meta.ogDescription || meta.description;
+  const ogImage = meta.ogImage || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=1200';
+
+  setMetaTag('property', 'og:title', ogTitle);
+  setMetaTag('property', 'og:description', ogDescription);
   setMetaTag('property', 'og:url', meta.canonicalUrl);
   setMetaTag('property', 'og:type', meta.ogType || 'website');
   setMetaTag('property', 'og:site_name', 'Universal Hotels Australia');
-  if (meta.ogImage) {
-    setMetaTag('property', 'og:image', meta.ogImage);
-  }
+  setMetaTag('property', 'og:locale', 'en_AU');
+  setMetaTag('property', 'og:image', ogImage);
+  setMetaTag('property', 'og:image:alt', ogTitle);
 
-  // Twitter Cards
+  // 4. Twitter / X Card Tags
+  const twitterTitle = meta.twitterTitle || ogTitle;
+  const twitterDescription = meta.twitterDescription || ogDescription;
+  const twitterImage = meta.twitterImage || ogImage;
+
   setMetaTag('name', 'twitter:card', 'summary_large_image');
-  setMetaTag('name', 'twitter:title', meta.title);
-  setMetaTag('name', 'twitter:description', meta.description);
-  if (meta.ogImage) {
-    setMetaTag('name', 'twitter:image', meta.ogImage);
-  }
+  setMetaTag('name', 'twitter:site', '@universalhotelsau');
+  setMetaTag('name', 'twitter:title', twitterTitle);
+  setMetaTag('name', 'twitter:description', twitterDescription);
+  setMetaTag('name', 'twitter:image', twitterImage);
+  setMetaTag('name', 'twitter:image:alt', twitterTitle);
 
-  // Canonical Tag
+  // 5. Canonical Tag
   let canonicalEl = document.querySelector('link[rel="canonical"]');
   if (!canonicalEl) {
     canonicalEl = document.createElement('link');
@@ -364,4 +395,193 @@ export const applySeoMetadata = (meta: SeoMetadata) => {
     document.head.appendChild(canonicalEl);
   }
   canonicalEl.setAttribute('href', meta.canonicalUrl);
+
+  // 6. Schema.org JSON-LD structured data (page-specific)
+  const schemaScriptId = 'schema-page-active';
+  let schemaScript = document.getElementById(schemaScriptId) as HTMLScriptElement | null;
+  if (meta.schemaJson) {
+    if (!schemaScript) {
+      schemaScript = document.createElement('script');
+      schemaScript.id = schemaScriptId;
+      schemaScript.type = 'application/ld+json';
+      document.head.appendChild(schemaScript);
+    }
+    schemaScript.text = JSON.stringify(meta.schemaJson);
+  } else if (schemaScript) {
+    schemaScript.remove();
+  }
+
+  // Cleanup on component unmount
+  return () => {
+    const existingSchema = document.getElementById(schemaScriptId);
+    if (existingSchema) {
+      existingSchema.remove();
+    }
+  };
 };
+
+// 9. Specific Open Graph & Twitter Presets for Target Sections
+
+export const SEO_DASHBOARD_METADATA: SeoMetadata = {
+  title: 'SEO & AEO Architecture Dashboard | Universal Hotels Australia',
+  description: 'Technical SEO architecture, JSON-LD schema graphs, local landing matrix, 301 redirects, and AI engine optimization for Universal Hotels\' 16 Sydney venues.',
+  canonicalUrl: 'https://universalhotels.com.au/seo',
+  ogType: 'website',
+  ogTitle: 'SEO & AEO Architecture Dashboard | Universal Hotels Sydney',
+  ogDescription: 'Live technical SEO framework, dynamic LocalBusiness JSON-LD schemas, 301 canonical redirects, and Perplexity/Gemini AI engine optimization for 16 Sydney venues.',
+  ogImage: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=1200',
+  twitterTitle: 'Universal Hotels Sydney | SEO & AEO Technical Architecture',
+  twitterDescription: 'Explore the technical SEO framework, schema graph, and local search architecture powering Universal Hotels across Sydney.',
+  twitterImage: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=1200',
+  keywords: ['Universal Hotels SEO', 'Sydney hospitality SEO', 'Local SEO Sydney pubs', 'Schema.org LocalBusiness', 'AEO AI optimization', 'Sydney venue architecture'],
+  schemaJson: {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    name: 'Universal Hotels Sydney SEO & AEO Architecture',
+    headline: 'Technical SEO & AI Engine Optimization Framework for Universal Hotels Australia',
+    description: 'Comprehensive technical architecture, structured data graph, and canonical routing matrix for Universal Hotels\' 16 properties across Sydney.',
+    url: 'https://universalhotels.com.au/seo',
+    author: {
+      '@type': 'Organization',
+      name: 'Universal Hotels Australia'
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Universal Hotels Australia',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://universalhotels.com.au/assets/Universalhotels-Masterblack-removebg-preview.png'
+      }
+    }
+  }
+};
+
+export const FUNCTIONS_HUB_METADATA: SeoMetadata = {
+  title: 'Functions & Event Spaces Sydney | Universal Hotels Concierge',
+  description: 'Explore function rooms, private bars, rooftops, and event spaces across Sydney with Universal Hotels. Tailored packages for birthdays, corporate events, and private dining.',
+  canonicalUrl: 'https://universalhotels.com.au/functions',
+  ogType: 'website',
+  ogTitle: 'Functions & Event Spaces in Sydney | Universal Hotels Australia',
+  ogDescription: 'From intimate private dining and rooftop celebrations to 500-guest venue takeovers across 16 iconic Sydney destinations. Browse spaces and enquire online.',
+  ogImage: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200',
+  twitterTitle: 'Functions & Event Spaces Sydney | Universal Hotels',
+  twitterDescription: 'Host your corporate seminar, cocktail celebration, or private dinner across 16 Sydney venues with Universal Hotels concierge.',
+  twitterImage: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200',
+  keywords: ['Sydney function spaces', 'event venues Sydney', 'Sydney rooftop party hire', 'private dining rooms Sydney', 'corporate events Sydney', 'party venues Sydney CBD'],
+  schemaJson: {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Universal Hotels Sydney Functions & Event Concierge',
+    serviceType: 'Event Planning & Venue Hire',
+    provider: {
+      '@type': 'Organization',
+      name: 'Universal Hotels Australia',
+      telephone: '+61-2-8080-7000',
+      email: 'functions@universalhotels.com.au'
+    },
+    areaServed: {
+      '@type': 'City',
+      name: 'Sydney',
+      addressRegion: 'NSW',
+      addressCountry: 'AU'
+    },
+    description: 'Bespoke event planning and space hire across 16 iconic Sydney pubs, rooftop cocktail lounges, underground clubs, and private dining spaces.',
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'AUD',
+      lowPrice: '500',
+      offerCount: '25'
+    }
+  }
+};
+
+export const generateFunctionsIntentSeoMetadata = (
+  slug: string,
+  title: string,
+  seoTitle: string,
+  seoDescription: string,
+  heroImage?: string,
+  faqs?: Array<{ question: string; answer: string }>
+): SeoMetadata => {
+  const imageUrl = heroImage || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200';
+  const canonicalUrl = `https://universalhotels.com.au/functions/${slug}`;
+
+  const schemas: any[] = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: `${title} Hire Sydney | Universal Hotels`,
+      serviceType: `${title} Space Hire`,
+      description: seoDescription,
+      url: canonicalUrl,
+      provider: {
+        '@type': 'Organization',
+        name: 'Universal Hotels Australia',
+        telephone: '+61-2-8080-7000'
+      },
+      areaServed: 'Sydney NSW'
+    }
+  ];
+
+  if (faqs && faqs.length > 0) {
+    schemas.push(generateFaqSchema(faqs));
+  }
+
+  return {
+    title: `${seoTitle} | Universal Hotels Australia`,
+    description: seoDescription,
+    canonicalUrl,
+    ogType: 'website',
+    ogTitle: `${title} Venues & Packages Sydney | Universal Hotels`,
+    ogDescription: seoDescription,
+    ogImage: imageUrl,
+    twitterTitle: `${title} Venues Sydney | Universal Hotels`,
+    twitterDescription: seoDescription,
+    twitterImage: imageUrl,
+    keywords: [
+      `${title.toLowerCase()} Sydney`,
+      `${title.toLowerCase()} venue hire`,
+      `Sydney ${title.toLowerCase()} spaces`,
+      'Universal Hotels functions'
+    ],
+    schemaJson: schemas.length === 1 ? schemas[0] : schemas
+  };
+};
+
+// 10. Venue Detail SEO & Social Metadata Generator
+export const generateVenueSeoMetadata = (venue: VenueDetailRecord): SeoMetadata => {
+  const title = `${venue.seo.title} | Universal Hotels Australia`;
+  const description = venue.seo.metaDescription;
+  const canonicalUrl = `https://universalhotels.com.au/venues/${venue.slug}`;
+  const ogTitle = (venue.seo as any)?.ogTitle || `${venue.venueName} | Universal Hotels Sydney`;
+  const ogDescription = (venue.seo as any)?.ogDescription || venue.seo.metaDescription;
+  const ogImage = (venue.seo as any)?.ogImage || venue.heroImage || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=1200';
+
+  let ogType: 'restaurant' | 'place' | 'website' = 'restaurant';
+  if (venue.accommodation) {
+    ogType = 'website';
+  }
+
+  return {
+    title,
+    description,
+    canonicalUrl,
+    ogType,
+    ogTitle,
+    ogDescription,
+    ogImage,
+    twitterTitle: ogTitle,
+    twitterDescription: ogDescription,
+    twitterImage: ogImage,
+    keywords: [
+      venue.venueName,
+      `${venue.venueName} ${venue.locationSuburb}`,
+      `${venue.locationSuburb} pubs`,
+      `${venue.locationSuburb} dining`,
+      'Universal Hotels Sydney'
+    ]
+  };
+};
+
+// 11. Re-export SEO Audit Engine
+export * from './seoAudit';

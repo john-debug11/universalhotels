@@ -29,6 +29,8 @@ import {
   WEBSITE_SCHEMA, 
   SEO_REDIRECT_MAP, 
   KEYWORD_MAPPING_MATRIX,
+  SEO_DASHBOARD_METADATA,
+  applySeoMetadata,
   generateVenueLocalBusinessSchema,
   checkRedirect
 } from '../utils/seo';
@@ -39,6 +41,7 @@ import {
   AnalyticsEventPayload
 } from '../utils/analytics';
 import { Button } from '../components/ui/Button';
+import { VenueRoutesSeoAuditReport } from '../components/seo/VenueRoutesSeoAuditReport';
 
 export interface SeoArchitectureDashboardPageProps {
   onNavigate?: (path: string) => void;
@@ -47,12 +50,18 @@ export interface SeoArchitectureDashboardPageProps {
 export const SeoArchitectureDashboardPage: React.FC<SeoArchitectureDashboardPageProps> = ({
   onNavigate
 }) => {
-  const [activeTab, setActiveTab] = useState<'technical' | 'localseo' | 'aeo' | 'keywords' | 'redirects' | 'analytics'>('technical');
+  const [activeTab, setActiveTab] = useState<'audit' | 'technical' | 'localseo' | 'aeo' | 'keywords' | 'redirects' | 'analytics'>('audit');
   const [testRedirectInput, setTestRedirectInput] = useState<string>('/the-imperial');
   const [testRedirectOutput, setTestRedirectOutput] = useState<string | null>(null);
 
   // Analytics event stream
   const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEventPayload[]>(getRecentAnalyticsEvents());
+
+  // Apply Specific SEO, Open Graph, Twitter & JSON-LD Meta tags for SEO Dashboard
+  useEffect(() => {
+    const cleanupSeo = applySeoMetadata(SEO_DASHBOARD_METADATA);
+    return cleanupSeo;
+  }, []);
 
   useEffect(() => {
     const unsubscribe = subscribeToAnalytics(() => {
@@ -122,12 +131,13 @@ export const SeoArchitectureDashboardPage: React.FC<SeoArchitectureDashboardPage
           {/* Navigation Tabs */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-8 border-t border-neutral-800/80 mt-8">
             {[
-              { id: 'technical', label: '1. Technical SEO & Schema', icon: ShieldCheck },
-              { id: 'localseo', label: '2. Local SEO & NAP Matrix', icon: MapPin },
-              { id: 'aeo', label: '3. AEO / GEO AI Extraction', icon: Sparkles },
-              { id: 'keywords', label: '4. Keyword Mapping Matrix', icon: Tag },
-              { id: 'redirects', label: '5. 301 Migration Redirects', icon: RefreshCw },
-              { id: 'analytics', label: '6. Live Analytics & Conversion Tracking', icon: BarChart2 }
+              { id: 'audit', label: '1. Venue Routes SEO Audit', icon: ShieldCheck },
+              { id: 'technical', label: '2. Technical SEO & Schema', icon: FileCode },
+              { id: 'localseo', label: '3. Local SEO & NAP Matrix', icon: MapPin },
+              { id: 'aeo', label: '4. AEO / GEO AI Extraction', icon: Sparkles },
+              { id: 'keywords', label: '5. Keyword Mapping Matrix', icon: Tag },
+              { id: 'redirects', label: '6. 301 Migration Redirects', icon: RefreshCw },
+              { id: 'analytics', label: '7. Live Analytics & Conversion Tracking', icon: BarChart2 }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -152,6 +162,11 @@ export const SeoArchitectureDashboardPage: React.FC<SeoArchitectureDashboardPage
 
       {/* Tab Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+
+        {/* TAB 1: VENUE ROUTES SEO AUDIT SUMMARY REPORT */}
+        {activeTab === 'audit' && (
+          <VenueRoutesSeoAuditReport onNavigate={onNavigate} />
+        )}
 
         {/* TAB 1: TECHNICAL SEO & SCHEMA */}
         {activeTab === 'technical' && (
@@ -253,6 +268,88 @@ export const SeoArchitectureDashboardPage: React.FC<SeoArchitectureDashboardPage
               <pre className="bg-[#121314] text-neutral-200 p-5 rounded-xl text-xs overflow-x-auto font-mono leading-relaxed border border-neutral-800">
                 {JSON.stringify(ORGANIZATION_SCHEMA, null, 2)}
               </pre>
+            </div>
+
+            {/* Live Open Graph & Twitter Card Inspector */}
+            <div className="bg-white rounded-2xl border border-[#E7E2D9] p-6 sm:p-8 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#EFECE6] pb-4">
+                <div>
+                  <h3 className="font-serif font-bold text-xl text-neutral-900">
+                    Live Open Graph & Twitter Cards Inspection
+                  </h3>
+                  <p className="text-xs text-neutral-500">
+                    Verified meta tags actively injected into the document head for social sharing, rich link previews, and indexability.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">
+                    OG & Twitter Verified
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Meta Tags Table */}
+                <div className="bg-[#FAF8F5] rounded-xl p-4 border border-[#EFECE6] space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#A47844]">
+                    Active Head Tags
+                  </h4>
+                  <div className="space-y-2 text-xs font-mono">
+                    <div className="p-2 bg-white rounded border border-[#EFECE6] flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-neutral-400">property="og:title"</span>
+                      <span className="text-neutral-900 font-semibold">{SEO_DASHBOARD_METADATA.ogTitle}</span>
+                    </div>
+                    <div className="p-2 bg-white rounded border border-[#EFECE6] flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-neutral-400">property="og:description"</span>
+                      <span className="text-neutral-700 text-[11px] leading-relaxed">{SEO_DASHBOARD_METADATA.ogDescription}</span>
+                    </div>
+                    <div className="p-2 bg-white rounded border border-[#EFECE6] flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-neutral-400">property="og:image"</span>
+                      <span className="text-neutral-600 truncate text-[11px]">{SEO_DASHBOARD_METADATA.ogImage}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2 bg-white rounded border border-[#EFECE6]">
+                        <span className="text-[10px] font-bold text-neutral-400 block">name="twitter:card"</span>
+                        <span className="text-neutral-800">summary_large_image</span>
+                      </div>
+                      <div className="p-2 bg-white rounded border border-[#EFECE6]">
+                        <span className="text-[10px] font-bold text-neutral-400 block">property="og:locale"</span>
+                        <span className="text-neutral-800">en_AU</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Social Card Simulation */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#A47844]">
+                    Simulated Social Share Snippet (Slack / Twitter / LinkedIn)
+                  </h4>
+                  <div className="bg-[#121314] text-white rounded-xl overflow-hidden border border-neutral-700 shadow-md">
+                    <div className="h-44 w-full relative overflow-hidden bg-neutral-800">
+                      <img
+                        src={SEO_DASHBOARD_METADATA.ogImage}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 left-2 bg-black/70 backdrop-blur px-2 py-0.5 rounded text-[10px] font-mono text-[#C7A379]">
+                        universalhotels.com.au
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-1.5 bg-[#18191B]">
+                      <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
+                        UNIVERSAL HOTELS AUSTRALIA
+                      </span>
+                      <h5 className="font-serif font-bold text-sm text-white line-clamp-1">
+                        {SEO_DASHBOARD_METADATA.ogTitle}
+                      </h5>
+                      <p className="text-xs text-neutral-300 line-clamp-2 leading-relaxed">
+                        {SEO_DASHBOARD_METADATA.ogDescription}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

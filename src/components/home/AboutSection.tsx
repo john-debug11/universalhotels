@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, ShieldCheck, HeartHandshake, History, Award, ArrowUpRight } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { UniversalHotelsLogo } from '../brand/UniversalHotelsLogo';
 
 export interface AboutSectionProps {
   onLearnMore?: () => void;
@@ -44,10 +45,14 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onLearnMore }) => {
 
           {/* Right Copy Column */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="space-y-2">
-              <span className="text-xs uppercase font-bold tracking-[0.2em] text-[#A47844]">
-                SECTION 08 • ABOUT UNIVERSAL HOTELS
-              </span>
+            <div className="space-y-3">
+              <UniversalHotelsLogo
+                variant="dark"
+                height={40}
+                showWordmark={true}
+                showSubtitle={true}
+                subtitleText="Established 1998 • Kospetas Family Hospitality"
+              />
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-[#121314] tracking-tight">
                 Sydney Hospitality with Soul, History & Character
               </h2>

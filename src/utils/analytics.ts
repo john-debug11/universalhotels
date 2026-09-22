@@ -9,6 +9,7 @@ export type ConversionEventType =
   | 'accommodation_click'
   | 'menu_click'
   | 'event_click'
+  | 'newsletter_signup'
   | 'page_view';
 
 export interface AnalyticsEventPayload {
@@ -156,5 +157,13 @@ export const trackEventClick = (eventName: string, venueName: string, ticketPric
     category: 'What\'s On',
     value: ticketPrice,
     label: `Event Ticket/Details: ${eventName} @ ${venueName}`
+  });
+};
+
+export const trackNewsletterSignup = (email: string) => {
+  trackConversion({
+    event: 'newsletter_signup',
+    category: 'Universal Social Club',
+    label: `Newsletter VIP Subscription: ${email}`
   });
 };

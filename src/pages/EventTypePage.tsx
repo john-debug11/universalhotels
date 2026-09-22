@@ -21,6 +21,7 @@ import { EventTypeConfig } from '../data/functionsData';
 import { VENUE_DETAILS } from '../data/venueDetails';
 import { MakeAnEnquiryForm } from '../components/functions/MakeAnEnquiryForm';
 import { EventEnquiryModal } from '../components/home/EventEnquiryModal';
+import { generateFunctionsIntentSeoMetadata, applySeoMetadata } from '../utils/seo';
 
 export interface EventTypePageProps {
   config: EventTypeConfig;
@@ -31,19 +32,25 @@ export const EventTypePage: React.FC<EventTypePageProps> = ({ config, onNavigate
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [selectedSpaceEnquiry, setSelectedSpaceEnquiry] = useState<string | null>(null);
 
-  // Update SEO Title and Meta Description
-  useEffect(() => {
-    document.title = `${config.seoTitle} | Universal Hotels Australia`;
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', config.seoDescription);
-    }
-  }, [config]);
-
   // Recommended Venues for this Event Intent
   const recommendedVenues = config.recommendedVenueSlugs
     .map(slug => ({ slug, data: VENUE_DETAILS[slug] }))
     .filter(v => !!v.data);
+
+  // Apply Specific Open Graph, Twitter, and Schema Metadata for this Event Intent
+  useEffect(() => {
+    const heroImg = recommendedVenues[0]?.data?.heroImage;
+    const meta = generateFunctionsIntentSeoMetadata(
+      config.slug,
+      config.title,
+      config.seoTitle,
+      config.seoDescription,
+      heroImg,
+      config.faqs
+    );
+    const cleanup = applySeoMetadata(meta);
+    return cleanup;
+  }, [config.slug, config.title, config.seoTitle, config.seoDescription]);
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">

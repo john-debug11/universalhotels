@@ -19,22 +19,17 @@ import { Badge } from '../components/ui/Badge';
 import { VenueFinder } from '../components/functions/VenueFinder';
 import { MakeAnEnquiryForm } from '../components/functions/MakeAnEnquiryForm';
 import { EVENT_TYPES_DATA } from '../data/functionsData';
+import { FUNCTIONS_HUB_METADATA, applySeoMetadata } from '../utils/seo';
 
 export interface FunctionsHubPageProps {
   onNavigate: (path: string) => void;
 }
 
 export const FunctionsHubPage: React.FC<FunctionsHubPageProps> = ({ onNavigate }) => {
-  // SEO
+  // SEO & Social Meta (Open Graph, Twitter Cards, Service Schema)
   useEffect(() => {
-    document.title = 'Functions & Events in Sydney | Universal Hotels Australia';
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute(
-        'content',
-        'Explore function rooms, private bars, rooftops, and event spaces across Sydney with Universal Hotels. Tailored packages for birthdays, corporate events, engagements, and Christmas parties.'
-      );
-    }
+    const cleanupSeo = applySeoMetadata(FUNCTIONS_HUB_METADATA);
+    return cleanupSeo;
   }, []);
 
   const eventCategories = Object.values(EVENT_TYPES_DATA);

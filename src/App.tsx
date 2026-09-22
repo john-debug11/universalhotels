@@ -26,6 +26,9 @@ import { FunctionsHubPage } from './pages/FunctionsHubPage';
 import { EventTypePage } from './pages/EventTypePage';
 import { AccommodationPage } from './pages/AccommodationPage';
 import { WhatsOnPage } from './pages/WhatsOnPage';
+import { AboutPage } from './pages/AboutPage';
+import { ContactPage } from './pages/ContactPage';
+import { ExperiencesPage } from './pages/ExperiencesPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { SeoArchitectureDashboardPage } from './pages/SeoArchitectureDashboardPage';
 
@@ -37,6 +40,77 @@ import { VENUE_DATABASE } from './data/venueDatabase';
 import { VENUE_DETAILS, VenueDetailRecord } from './data/venueDetails';
 import { EVENT_TYPES_DATA } from './data/functionsData';
 import { LOCATION_TAXONOMY, FUNCTIONS_TAXONOMY, COMPETITOR_ANALYSIS_SOLOTEL } from './data/informationArchitecture';
+
+// Canonical Slug Aliases & Precinct Mappings to prevent any 404s
+const VENUE_SLUG_ALIASES: Record<string, string> = {
+  'civic': 'civic-hotel',
+  'civic-hotel-sydney': 'civic-hotel',
+  'the-imperial-hotel-erskineville': 'imperial-hotel-erskineville',
+  'the-imperial-hotel': 'imperial-hotel-erskineville',
+  'imperial-hotel': 'imperial-hotel-erskineville',
+  'the-imperial': 'imperial-hotel-erskineville',
+  'imperial': 'imperial-hotel-erskineville',
+  'the-tudor-hotel-redfern': 'the-tudor-hotel',
+  'the-tudor': 'the-tudor-hotel',
+  'tudor-hotel': 'the-tudor-hotel',
+  'tudor': 'the-tudor-hotel',
+  'the-riley-hotel-darlinghurst': 'the-riley-hotel',
+  'the-riley': 'the-riley-hotel',
+  'riley-hotel': 'the-riley-hotel',
+  'riley': 'the-riley-hotel',
+  'the-harold-hotel-forest-lodge': 'the-harold',
+  'the-harold-hotel': 'the-harold',
+  'harold-hotel': 'the-harold',
+  'harold': 'the-harold',
+  'lord-roberts-hotel-east-sydney': 'the-lord-roberts-hotel',
+  'lord-roberts-hotel': 'the-lord-roberts-hotel',
+  'lord-roberts': 'the-lord-roberts-hotel',
+  'the-lord-roberts': 'the-lord-roberts-hotel',
+  'the-oxford-hotel-darlinghurst': 'the-oxford-hotel',
+  'the-oxford': 'the-oxford-hotel',
+  'oxford-hotel': 'the-oxford-hotel',
+  'oxford': 'the-oxford-hotel',
+  'universal': 'universal-sydney',
+  'universal-hotel': 'universal-sydney',
+  'the-evening-star-hotel-surry-hills': 'the-evening-star',
+  'the-evening-star-hotel': 'the-evening-star',
+  'the-evening-star': 'the-evening-star',
+  'evening-star': 'the-evening-star',
+  'palace-hotel-sydney': 'palace-hotel',
+  'palace': 'palace-hotel',
+  'v-bar-sydney': 'v-bar',
+  'vbar': 'v-bar',
+  'crown-hotel': 'crown-hotel-surry-hills',
+  'crown-hotel-sydney': 'crown-hotel-surry-hills',
+  'the-crown-hotel': 'crown-hotel-surry-hills',
+  'crown': 'crown-hotel-surry-hills',
+  'riverview-hotel': 'riverview-hotel-tempe',
+  'riverview': 'riverview-hotel-tempe',
+  'tempe': 'tempe-hotel',
+  'tempe-hotel-tempe': 'tempe-hotel',
+  'moko': 'moko-eastwood',
+  'moko-hotel': 'moko-eastwood',
+  'enfield': 'enfield-hotel',
+  'enfield-hotel-enfield': 'enfield-hotel'
+};
+
+const PRECINCT_SLUG_MAP: Record<string, string> = {
+  'sydney-cbd-haymarket': 'Sydney CBD',
+  'darlinghurst-oxford-street': 'Darlinghurst',
+  'surry-hills-redfern': 'Surry Hills',
+  'inner-west-erskineville': 'Erskineville',
+  'tempe-cooks-river': 'Tempe',
+  'northern-suburbs-eastwood': 'Eastwood',
+  'cbd': 'Sydney CBD',
+  'haymarket': 'Sydney CBD',
+  'darlinghurst': 'Darlinghurst',
+  'oxford-street': 'Darlinghurst',
+  'surry-hills': 'Surry Hills',
+  'redfern': 'Redfern',
+  'erskineville': 'Erskineville',
+  'tempe': 'Tempe',
+  'eastwood': 'Eastwood'
+};
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -116,24 +190,60 @@ export default function App() {
       return <SeoArchitectureDashboardPage onNavigate={handleNavigate} />;
     }
 
-    // 3. Check for single venue page: /venues/:slug
+    // 3. About Us Page
+    if (currentPath === '/about' || currentPath === '/about/' || currentPath === '/about-us' || currentPath === '/about-us/') {
+      return <AboutPage onNavigate={handleNavigate} />;
+    }
+
+    // 4. Contact Page
+    if (currentPath === '/contact' || currentPath === '/contact/' || currentPath === '/contact-us' || currentPath === '/contact-us/') {
+      return <ContactPage onNavigate={handleNavigate} />;
+    }
+
+    // 5. Experiences Page
+    if (currentPath === '/experiences' || currentPath === '/experiences/') {
+      return <ExperiencesPage onNavigate={handleNavigate} />;
+    }
+
+    // 6. Check for single venue page or precinct: /venues/:slug
     if (currentPath.startsWith('/venues/') && currentPath.length > 8) {
-      const slug = currentPath.replace('/venues/', '').replace(/\/$/, '');
-      const venueDetail = VENUE_DETAILS[slug];
+      const rawSlug = currentPath.replace('/venues/', '').replace(/\/$/, '');
+      const slug = rawSlug.toLowerCase();
+
+      // Check if this is a precinct URL from the navbar
+      if (PRECINCT_SLUG_MAP[slug]) {
+        return <VenuesDirectoryPage onNavigate={handleNavigate} initialLocation={PRECINCT_SLUG_MAP[slug]} />;
+      }
+
+      // Check canonical alias or direct match in VENUE_DETAILS
+      const resolvedSlug = VENUE_SLUG_ALIASES[slug] || slug;
+      const venueDetail = VENUE_DETAILS[resolvedSlug] || VENUE_DETAILS[slug];
 
       if (venueDetail) {
         return <VenueDetailTemplate venue={venueDetail} onNavigate={handleNavigate} />;
       }
+
+      // Fallback: search VENUE_DATABASE for matching venue
+      const dbMatch = VENUE_DATABASE.find(v => {
+        const vSlug = v.url.replace('/venues/', '').toLowerCase();
+        return vSlug === slug || vSlug === resolvedSlug || v.url === currentPath;
+      });
+      if (dbMatch) {
+        const vSlug = dbMatch.url.replace('/venues/', '');
+        if (VENUE_DETAILS[vSlug]) {
+          return <VenueDetailTemplate venue={VENUE_DETAILS[vSlug]} onNavigate={handleNavigate} />;
+        }
+      }
     }
 
-    // 4. Check for venue directory: /venues
-    if (currentPath === '/venues' || currentPath.startsWith('/venues?')) {
+    // 7. Check for venue directory: /venues
+    if (currentPath === '/venues' || currentPath === '/venues/' || currentPath.startsWith('/venues?')) {
       const urlParams = new URLSearchParams(window.location.search);
       const initialLoc = urlParams.get('location') || undefined;
       return <VenuesDirectoryPage onNavigate={handleNavigate} initialLocation={initialLoc} />;
     }
 
-    // 5. Check for functions and intent pages: /functions
+    // 8. Check for functions and intent pages: /functions
     if (currentPath === '/functions' || currentPath === '/functions/') {
       return <FunctionsHubPage onNavigate={handleNavigate} />;
     }
@@ -148,7 +258,7 @@ export default function App() {
       return <FunctionsHubPage onNavigate={handleNavigate} />;
     }
 
-    // 6. Check for accommodation: /accommodation
+    // 9. Check for accommodation: /accommodation
     if (currentPath === '/accommodation' || currentPath === '/accommodation/') {
       return <AccommodationPage onNavigate={handleNavigate} />;
     }
@@ -158,7 +268,7 @@ export default function App() {
       return <AccommodationPage onNavigate={handleNavigate} initialPropertySlug={propSlug} />;
     }
 
-    // 7. Check for what's on: /whats-on
+    // 10. Check for what's on: /whats-on
     if (currentPath === '/whats-on' || currentPath === '/whats-on/') {
       return <WhatsOnPage onNavigate={handleNavigate} />;
     }
@@ -168,12 +278,12 @@ export default function App() {
       return <WhatsOnPage onNavigate={handleNavigate} initialEventSlug={eventSlug} />;
     }
 
-    // 8. Homepage
+    // 11. Homepage
     if (currentPath === '/' || currentPath === '') {
       return <HomePage onNavigate={handleNavigate} />;
     }
 
-    // 9. 404 Fallback for unrecognized routes
+    // 12. 404 Fallback for unrecognized routes
     return <NotFoundPage onNavigate={handleNavigate} attemptedPath={currentPath} />;
   };
 

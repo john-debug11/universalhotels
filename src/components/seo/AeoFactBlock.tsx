@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { VenueRecord } from '../../data/venueDatabase';
 import { VenueDetailRecord } from '../../data/venueDetails';
-import { generateFaqSchema } from '../../utils/seo';
+import { generateFaqSchema, getEnrichedVenueFaqs } from '../../utils/seo';
 
 export interface AeoFactBlockProps {
   venue: VenueRecord;
@@ -32,8 +32,8 @@ export const AeoFactBlock: React.FC<AeoFactBlockProps> = ({
 }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
-  // Derive factual FAQs for AEO/GEO
-  const faqs = detail?.faqs && detail.faqs.length > 0 ? detail.faqs : [
+  // Derive factual FAQs for AEO/GEO including Parking, Accessibility, and Booking
+  const faqs = detail ? getEnrichedVenueFaqs(detail) : [
     {
       question: `What are the opening hours of ${venue.venueName}?`,
       answer: `${venue.venueName} is open Monday to Sunday. Opening hours: ${venue.openingHours}.`
@@ -51,16 +51,25 @@ export const AeoFactBlock: React.FC<AeoFactBlockProps> = ({
     {
       question: `How do I make a table or group reservation at ${venue.venueName}?`,
       answer: `Reservations can be made online via the official Universal Hotels portal, or by calling ${venue.phone}.`
+    },
+    {
+      question: `What are the parking and accessibility details for ${venue.venueName}?`,
+      answer: `${venue.venueName} is located at ${venue.address}. Street parking and nearby transport hubs are available. Primary public areas provide step-free access and assistance animals are welcomed.`
     }
   ];
 
   // Unique script ID
   const venueId = venue.url.replace(/\//g, '-');
 
-  // Inject FAQPage Schema
+  // Inject FAQPage Schema only if not already provided by venue detail template graph
   useEffect(() => {
+    // If VenueDetailTemplate already has injected schema-venue, skip separate injection to prevent duplicate schema
+    if (detail && document.getElementById(`schema-venue-${detail.slug}`)) {
+      return;
+    }
+
     const scriptId = `faq-json-ld-${venueId}`;
-    let script = document.getElementById(scriptId);
+    let script = document.getElementById(scriptId) as HTMLScriptElement | null;
     if (!script) {
       script = document.createElement('script');
       script.id = scriptId;
@@ -68,7 +77,14 @@ export const AeoFactBlock: React.FC<AeoFactBlockProps> = ({
       document.head.appendChild(script);
     }
     script.textContent = JSON.stringify(generateFaqSchema(faqs));
-  }, [faqs, venueId]);
+
+    return () => {
+      const el = document.getElementById(scriptId);
+      if (el) {
+        el.remove();
+      }
+    };
+  }, [faqs, venueId, detail]);
 
   const hasAccommodation = Boolean(venue.accommodation && venue.accommodation.trim() !== '');
 
